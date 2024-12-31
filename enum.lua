@@ -26,12 +26,27 @@ SOFTWARE.
 
 local Enum = {};
 
+local normalEnum = {};
+normalEnum.__index = function(t, key)
+    if string.sub(key, -1,-1) == "_" then
+        local newstr = string.sub(key, 1,-2);
+
+        if t[newstr] then
+            return t[newstr];
+        end
+    end
+end
+
 function Enum.newEnum(...)
     local args = {...};
 
-    local instance = {};
+    local instance = setmetatable({}, normalEnum);
 
     for _, v in ipairs(args) do
+        if instance[v] or instance[v .. "_"] then
+            error("cannot make an enum that has an item that is equal to a different item with '_' appended to the end (ie: 'a' and 'a_')");
+        end
+
         instance[v] = v;
     end
 
@@ -41,8 +56,23 @@ end
 function Enum.newReturnEnum(...)
     local args = {...};
 
-    local ret_ = {};
-    local instance = setmetatable({}, {__call = function() return ret_; end});
+    local ret_ = setmetatable({}, normalEnum);
+
+    local instance = setmetatable({}, {
+        __call = function()
+            return ret_;
+        end,
+
+        __index = function(t, key)
+            if string.sub(key, -1,-1) == "_" then
+                local newstr = string.sub(key, 1,-2);
+
+                if t[newstr] then
+                    return t[newstr];
+                end
+            end
+        end
+    });
 
     for i = 1, #args, 2 do
         instance[args[i]] = args[i];
@@ -52,7 +82,7 @@ function Enum.newReturnEnum(...)
     return instance;
 end
 
-function Enum.newInOut()
+function Enum.newInOutEnum()
     return setmetatable({}, {__index = function(_, key) return key; end});
 end
 
