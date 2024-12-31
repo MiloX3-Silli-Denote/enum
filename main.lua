@@ -9,7 +9,7 @@ print("blue" == colourEnum.blue);   -- true
 print("green" == colourEnum.green); -- true
 print("chair" == colourEnum.chair); -- false
 
-local inout = Enum.newInOut();
+local inout = Enum.newInOutEnum();
 
 print("red" == inout.red);     -- true
 print("blue" == inout.blue);   -- true
